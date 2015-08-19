@@ -1,18 +1,17 @@
 {
   "name": "block-comment-lines",
   "main": "./lib/block-comment-lines",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Puts the whole line selected by user in a block comment.",
   "activationCommands": {
     "atom-text-editor": [
-        "block-comment-lines:toggle"
+      "block-comment-lines:toggle"
     ]
   },
-  "repository": "https://github.com/atom/block-comment-lines",
+  "repository": "https://github.com/kaasbaardje/block-comment-lines",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
