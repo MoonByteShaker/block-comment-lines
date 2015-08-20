@@ -1,7 +1,7 @@
 {
   "name": "block-comment-lines",
   "main": "./lib/block-comment-lines",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Puts the whole line selected by user in a block comment.",
   "activationCommands": {
     "atom-text-editor": [
