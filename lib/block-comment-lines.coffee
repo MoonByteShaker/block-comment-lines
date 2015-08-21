@@ -8,17 +8,11 @@ module.exports =
         editor = workspace.getActiveTextEditor()
         selection = editor.getLastSelection()
 
-        isBlockCommentDefinition = () ->
+        isBlockCommentDefinition_Workaround = () ->
+            return true if isCurcorInBlockCommentDefinition()
             descriptorArray = getDescriptorArray()
             for element in descriptorArray
-                if (element.indexOf "punctuation" isnt -1) and (element.indexOf("definition") isnt -1)
-                    return true
-            return false
-
-        isEmbeddedLanguage = () ->
-            descriptorArray = getDescriptorArray()
-            for element in descriptorArray
-                if (element.indexOf("embedded") > -1)
+                if element.indexOf("punctuation") isnt -1 and element.indexOf("definition") isnt -1
                     return true
             return false
 
@@ -32,7 +26,39 @@ module.exports =
             editor.setSelectedScreenRange(oldCursorPos)
             return columnWidth
 
+        isCursorInBlockComment_WorkAround = () ->
+            return true if isCursorInBlockComment()
+            descriptorArray = getDescriptorArray()
+            for element in descriptorArray
+                if element.indexOf("comment") isnt -1 and element.indexOf("block") isnt -1 and element.indexOf("definition") is -1
+                    return true
+            return false
+
+        getBufferRangeForCommentScope_WorkAround = () ->
+            apiBufferRange = editor.bufferRangeForScopeAtCursor(".comment.block")
+            return apiBufferRange if apiBufferRange?
+            oldCursorPos = editor.getCursorScreenPosition()
+
+            editor.moveToBeginningOfLine()
+            columnWidth = getColumnWidth()
+            column = -1
+
+            isStartOfBlockComment = isCursorInBlockComment()
+            while (! isStartOfBlockComment) and column < columnWidth
+                editor.moveRight 1
+                isStartOfBlockComment = isCursorInBlockComment()
+                column = editor.getCursorScreenPosition().column
+
+            if ! isStartOfBlockComment
+                editor.setCursorScreenPosition(oldCursorPos)
+                return null
+
+            apiBufferRange = editor.bufferRangeForScopeAtCursor(".comment.block")
+            return apiBufferRange
+
         getBufferRangeForScopeAtCursorWorkAround = (sort) ->
+            apiBufferRange = editor.bufferRangeForScopeAtCursor(".punctuation.definition.comment")
+            return apiBufferRange if apiBufferRange?
             column = -1
             # editor.insertText("#{column}", {select: true})
 
@@ -40,7 +66,7 @@ module.exports =
                 columnWidth = getColumnWidth()
                 rangeStart = editor.getCursorScreenPosition()
                 editor.moveRight 1
-                while isBlockCommentDefinition() and column isnt columnWidth
+                while isBlockCommentDefinition_Workaround() and column isnt columnWidth
                     editor.moveRight 1
                     column = editor.getCursorScreenPosition().column
                 rangeEnd = editor.getCursorScreenPosition()
@@ -49,11 +75,11 @@ module.exports =
             if sort is "end"
                 rangeEnd = editor.getCursorScreenPosition()
                 editor.moveLeft 1
-                while isBlockCommentDefinition() and column isnt 0
+                while isBlockCommentDefinition_Workaround() and column isnt 0
                     editor.moveLeft 1
                     column = editor.getCursorScreenPosition().column
-                rangeStart = editor.getCursorScreenPosition()
                 editor.moveRight 1
+                rangeStart = editor.getCursorScreenPosition()
 
             return null if column is -1
 
@@ -62,20 +88,18 @@ module.exports =
             return range
 
         getCommentDefinitionRange = (sort) ->
+            lineCommentRange = getBufferRangeForCommentScope_WorkAround()
+            return null if ! lineCommentRange?
             switch sort
                 when "start"
-                    lineCommentRange = editor.bufferRangeForScopeAtCursor(".comment.block").start
+                    lineCommentRange = lineCommentRange.start
                 when "end"
-                    lineCommentRange = editor.bufferRangeForScopeAtCursor(".comment.block").end
+                    lineCommentRange = lineCommentRange.end
                 else
                     return false
 
             editor.setCursorScreenPosition(lineCommentRange)
-            ### workAround for "bufferRangeForScopeAtCursor" ###
-            if isEmbeddedLanguage()
-                getBufferRangeForScopeAtCursorWorkAround(sort)
-            else
-                editor.bufferRangeForScopeAtCursor(".punctuation.definition.comment")
+            getBufferRangeForScopeAtCursorWorkAround(sort)
 
         isCursorInBlockComment = () ->
             editor.bufferRangeForScopeAtCursor(".comment.block")?
@@ -84,7 +108,7 @@ module.exports =
             editor.bufferRangeForScopeAtCursor(".punctuation.definition.comment")?
 
         removeBracket = () ->
-            if isCursorInBlockComment()
+            if isCursorInBlockComment_WorkAround()
                 commentDefinitionStartRange = getCommentDefinitionRange('start')
                 while ! commentDefinitionStartRange?
                     editor.moveLeft(1)
