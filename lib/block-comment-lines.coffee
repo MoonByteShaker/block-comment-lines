@@ -23,7 +23,7 @@ module.exports =
             oldCursorPos = editor.getSelectedScreenRange()
             editor.moveToEndOfScreenLine()
             columnWidth = editor.getSelectedScreenRange().end.serialize()[1]
-            editor.setSelectedScreenRange(oldCursorPos)
+            editor.setSelectedScreenRange oldCursorPos
             return columnWidth
 
         isCursorInBlockComment_WorkAround = () ->
@@ -50,14 +50,14 @@ module.exports =
                 column = editor.getCursorScreenPosition().column
 
             if ! isStartOfBlockComment
-                editor.setCursorScreenPosition(oldCursorPos)
+                editor.setCursorScreenPosition oldCursorPos
                 return null
 
-            apiBufferRange = editor.bufferRangeForScopeAtCursor(".comment.block")
+            apiBufferRange = editor.bufferRangeForScopeAtCursor ".comment.block"
             return apiBufferRange
 
         getBufferRangeForScopeAtCursorWorkAround = (sort) ->
-            apiBufferRange = editor.bufferRangeForScopeAtCursor(".punctuation.definition.comment")
+            apiBufferRange = editor.bufferRangeForScopeAtCursor ".punctuation.definition.comment"
             return apiBufferRange if apiBufferRange?
             column = -1
             # editor.insertText("#{column}", {select: true})
@@ -98,7 +98,7 @@ module.exports =
                 else
                     return false
 
-            editor.setCursorScreenPosition(lineCommentRange)
+            editor.setCursorScreenPosition lineCommentRange
             getBufferRangeForScopeAtCursorWorkAround(sort)
 
         isCursorInBlockComment = () ->
@@ -109,31 +109,31 @@ module.exports =
 
         removeBracket = () ->
             if isCursorInBlockComment_WorkAround()
-                commentDefinitionStartRange = getCommentDefinitionRange('start')
+                commentDefinitionStartRange = getCommentDefinitionRange 'start'
                 while ! commentDefinitionStartRange?
                     editor.moveLeft(1)
-                    commentDefinitionStartRange = getCommentDefinitionRange('start')
+                    commentDefinitionStartRange = getCommentDefinitionRange 'start'
 
-                commentDefinitionEndRange = getCommentDefinitionRange('end')
+                commentDefinitionEndRange = getCommentDefinitionRange 'end'
                 while ! commentDefinitionEndRange?
                     editor.moveRight(1)
-                    commentDefinitionEndRange = getCommentDefinitionRange('end')
+                    commentDefinitionEndRange = getCommentDefinitionRange 'end'
 
                 if ! commentDefinitionStartRange? or ! commentDefinitionEndRange?
                     return true
 
                 editor.transact(() ->
-                    selection.setScreenRange(commentDefinitionEndRange)
-                    selection.insertText("")
-                    selection.setScreenRange(commentDefinitionStartRange)
-                    selection.insertText("")
+                    selection.setScreenRange commentDefinitionEndRange
+                    selection.insertText ""
+                    selection.setScreenRange commentDefinitionStartRange
+                    selection.insertText ""
                 )
                 return true
             return false
 
         getLanguage = () ->
             descriptorArray = getDescriptorArray()
-            if descriptorArray.length > 1 and descriptorArray[1].match(/embedded/g)
+            if descriptorArray.length > 1 and descriptorArray[1].match /embedded/g
                 descriptorArray = descriptorArray[1].split "."
             else
                 descriptorArray = descriptorArray[0].split "."
@@ -158,14 +158,14 @@ module.exports =
 
         selection = editor.getLastSelection()
         rowRange = selection.getBufferRowRange()
-        selection.selectLine(rowRange[0]);
-        selection.selectLine(rowRange[1]);
+        selection.selectLine rowRange[0]
+        selection.selectLine rowRange[1]
         selection = editor.getLastSelection()
         selectionText = selection.getText()
 
         editor.transact(() ->
             selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
             editor.insertNewline()
-            editor.moveUp(2)
+            editor.moveUp 2
             selection.joinLines()
         )
