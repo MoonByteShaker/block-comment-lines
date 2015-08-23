@@ -18,18 +18,22 @@ module.exports =
             return columnWidth
 
         getCharacterCount = (countDirection) ->
-            oldCursorPos = editor.getCursorScreenPosition()
-            lineCount = 0
-            if countDirection is "bottom"
-                editor.selectToBottom()
-                lineCount = editor.getCursorScreenPosition().row
-            else
-                editor.selectToTop()
-                lineCount = editor.getLineCount() - editor.getCursorScreenPosition().row
+            startPos = editor.getCursorScreenPosition()
+            buffer = editor.getBuffer()
+            buffer.setText(editor.getText())
 
-            selection = editor.getLastSelection()
-            characterCount = selection.getText().split(/./).length + lineCount
-            editor.setCursorScreenPosition oldCursorPos, {autoscroll: false}
+            if countDirection is "bottom"
+                lineCount = editor.getLineCount() - editor.getCursorScreenPosition().row
+                endPos = buffer.getEndPosition()
+            else
+                lineCount = editor.getCursorScreenPosition().row
+                endPos = buffer.getFirstPosition()
+
+            range = editor.getSelectedScreenRange()
+            range.constructor startPos, endPos
+            bufferText = buffer.getTextInRange(range)
+            characterCount = bufferText.split(/./).length + lineCount
+            editor.setCursorScreenPosition startPos
             return characterCount
 
         getLanguage = () ->
@@ -139,6 +143,11 @@ module.exports =
         removeBracket = () ->
             if isCursorInBlockComment()
                 # characterCountToTop = getCharacterCount "top"
+                # while characterCountToTop > 0
+                #     characterCountToTop--
+                #     editor.moveLeft 1
+                # return true
+
                 commentDefinitionStartRange = getCommentDefinitionRange 'start'
                 while ! commentDefinitionStartRange?
                     editor.moveLeft 1
