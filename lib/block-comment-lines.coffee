@@ -67,7 +67,7 @@ module.exports =
             isCursorInBlockComment_WorkAround()
 
         getApiCommmentRange_WorkAround = () ->
-            return null if ! isCursorInBlockComment()
+            return null if ! isCursorInBlockComment_WorkAround()
             oldCursorPos = editor.getCursorScreenPosition()
             editor.moveToBeginningOfLine()
             columnWidth = getColumnWidth()
@@ -92,15 +92,14 @@ module.exports =
             getApiCommmentRange_WorkAround()
 
         getApiCommentDefinitionRange_WorkAround = (comDefType) ->
-            apiBufferRange = editor.bufferRangeForScopeAtCursor ".punctuation.definition.comment"
-            return apiBufferRange if apiBufferRange?
+            return null if ! isBlockCommentDefinition_Workaround()
             column = -1
 
             if comDefType is "start"
                 columnWidth = getColumnWidth()
                 rangeStart = editor.getCursorScreenPosition()
                 editor.moveRight 1
-                while isBlockCommentDefinition_Workaround() and column isnt columnWidth
+                while isBlockCommentDefinition_Workaround() and column < columnWidth
                     editor.moveRight 1
                     column = editor.getCursorScreenPosition().column
                 rangeEnd = editor.getCursorScreenPosition()
@@ -142,26 +141,21 @@ module.exports =
 
         removeBracket = () ->
             if isCursorInBlockComment()
-                # characterCountToTop = getCharacterCount "top"
-                # while characterCountToTop > 0
-                #     characterCountToTop--
-                #     editor.moveLeft 1
-                # return true
-
+                characterCountToTop = getCharacterCount "top"
                 commentDefinitionStartRange = getCommentDefinitionRange 'start'
-                while ! commentDefinitionStartRange?
+                while ! commentDefinitionStartRange? and characterCountToTop > 0
+                    characterCountToTop--
                     editor.moveLeft 1
                     commentDefinitionStartRange = getCommentDefinitionRange 'start'
+                return true if ! commentDefinitionStartRange? or characterCountToTop is 0
 
-                return true if ! commentDefinitionStartRange?
-
-                # characterCountToBottom = getCharacterCount "bottom"
+                characterCountToBottom = getCharacterCount "bottom"
                 commentDefinitionEndRange = getCommentDefinitionRange 'end'
-                while ! commentDefinitionEndRange?
+                while ! commentDefinitionEndRange? and characterCountToBottom > 0
+                    characterCountToBottom--
                     editor.moveRight 1
                     commentDefinitionEndRange = getCommentDefinitionRange 'end'
-
-                return true if ! commentDefinitionEndRange?
+                return true if ! commentDefinitionEndRange? or characterCountToBottom is 0
 
                 selection = editor.getLastSelection()
                 editor.transact(() ->
