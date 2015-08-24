@@ -6,7 +6,9 @@
 * embedded languages can be identified
 ## 0.1.2
 * api bugs of 'bufferRangeForScopeAtCursor' are fixed with own workaround rebuilded methods
-## 0.1.3
+## 0.1.4
 * style - structure of code is enhanced
 * performance - usage of one while loop is reduced
 * bugfix - possibility of endless loop eliminated
+## 0.1.5
+* performance - usage of unnecessary functions is reduced

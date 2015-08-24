@@ -20,13 +20,12 @@ module.exports =
         getCharacterCount = (countDirection) ->
             startPos = editor.getCursorScreenPosition()
             buffer = editor.getBuffer()
-            buffer.setText(editor.getText())
 
             if countDirection is "bottom"
-                lineCount = editor.getLineCount() - editor.getCursorScreenPosition().row
+                lineCount = editor.getScreenLineCount() - startPos.row
                 endPos = buffer.getEndPosition()
             else
-                lineCount = editor.getCursorScreenPosition().row
+                lineCount = startPos.row
                 endPos = buffer.getFirstPosition()
 
             range = editor.getSelectedScreenRange()
