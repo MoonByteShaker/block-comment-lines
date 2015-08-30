@@ -140,13 +140,16 @@ module.exports =
 
         removeBracket = () ->
             if isCursorInBlockComment()
+                editor.toggleSoftWrapped()
                 characterCountToTop = getCharacterCount "top"
                 commentDefinitionStartRange = getCommentDefinitionRange 'start'
                 while ! commentDefinitionStartRange? and characterCountToTop > 0
                     characterCountToTop--
                     editor.moveLeft 1
                     commentDefinitionStartRange = getCommentDefinitionRange 'start'
-                return true if ! commentDefinitionStartRange? or characterCountToTop is 0
+                if ! commentDefinitionStartRange? or characterCountToTop is 0
+                    editor.toggleSoftWrapped()
+                    return true
 
                 characterCountToBottom = getCharacterCount "bottom"
                 commentDefinitionEndRange = getCommentDefinitionRange 'end'
@@ -154,7 +157,9 @@ module.exports =
                     characterCountToBottom--
                     editor.moveRight 1
                     commentDefinitionEndRange = getCommentDefinitionRange 'end'
-                return true if ! commentDefinitionEndRange? or characterCountToBottom is 0
+                if ! commentDefinitionEndRange? or characterCountToBottom is 0
+                    editor.toggleSoftWrapped()
+                    return true
 
                 selection = editor.getLastSelection()
                 editor.transact(() ->
@@ -163,6 +168,7 @@ module.exports =
                     selection.setScreenRange commentDefinitionStartRange
                     selection.insertText ""
                 )
+                editor.toggleSoftWrapped()
                 return true
             return false
 
@@ -183,10 +189,21 @@ module.exports =
                     commentEnd = '*/'
 
             selection = editor.getLastSelection()
-            rowRange = selection.getBufferRowRange()
-            selection.selectLine rowRange[0]
-            selection.selectLine rowRange[1]
-            selection = editor.getLastSelection()
+
+            if selection.isSingleScreenLine()
+                editor.moveToFirstCharacterOfLine()
+                selection.selectToEndOfLine()
+                selectionText = selection.getText()
+                selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
+                return
+            else
+                rowRange = selection.getBufferRowRange()
+                if selection.isReversed()
+                    selection.selectToFirstCharacterOfLine()
+                else
+                    editor.setCursorScreenPosition([rowRange[0]+1,0])
+                    editor.moveToFirstCharacterOfLine()
+                selection.selectLine rowRange[1]
             selectionText = selection.getText()
 
             editor.transact(() ->

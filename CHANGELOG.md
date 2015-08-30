@@ -11,4 +11,7 @@
 * performance - usage of one while loop is reduced
 * bugfix - possibility of endless loop eliminated
 ## 0.1.5
-* performance - usage of unnecessary functions is reduced
+* performance - unnecessary usage of api functions is reduced
+## 0.1.6
+* bugfix - works also with soft wrap
+* feature - block comment beginns at first word, not at beginning of line
