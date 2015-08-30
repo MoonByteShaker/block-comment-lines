@@ -1,6 +1,6 @@
 ## 0.1.0 - First Release
 * selected lines can be put in a block comment
-* selected code can be decommented
+* selected code can be uncommented
 * different languages can be identified
 ## 0.1.1
 * embedded languages can be identified

@@ -1,5 +1,5 @@
 {
-  "name": "Block-comment-lines",
+  "name": "block-comment-lines",
   "main": "./lib/block-comment-lines",
   "version": "0.1.6",
   "description": "Puts the selected line in a block-comment or removes it by toggling.",
