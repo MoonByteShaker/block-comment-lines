@@ -1,5 +1,5 @@
 # block-comment-lines package
-Puts the line selected by user in a block-comment or removes it by toggling. To remove the comment just place cursor inside comment.
+Puts the selected line in a block-comment or removes it by toggling. To remove the comment just place cursor inside comment.
 Besides document language this package also identifies embedded languages.
 The block comment definition for languages not yet supported is /\*....\*/.
 Supported languages are:
