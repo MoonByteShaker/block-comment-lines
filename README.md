@@ -11,4 +11,4 @@ Supported languages are:
 - C, C++, C#
 - PHP
 
-![presentation_1](./gifs/presentation_1.gif)
+![presentation_1](https://raw.githubusercontent.com/kaasbaardje/block-comment-lines/master/gifs/presentation_1.gif)
