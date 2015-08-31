@@ -13,5 +13,8 @@
 ## 0.1.5
 * performance - unnecessary usage of api functions is reduced
 ## 0.1.6
-* bugfix - works also with soft wrap
+* bugfix - uncomment works with soft wrap
 * feature - block comment beginns at first word, not at beginning of line
+## 0.1.7
+* bugfix - comment works with soft wrap
+* description - description is shorter

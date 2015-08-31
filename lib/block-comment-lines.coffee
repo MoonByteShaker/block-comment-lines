@@ -197,13 +197,15 @@ module.exports =
                 selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
                 return
             else
+                editor.toggleSoftWrapped()
                 rowRange = selection.getBufferRowRange()
                 if selection.isReversed()
                     selection.selectToFirstCharacterOfLine()
                 else
-                    editor.setCursorScreenPosition([rowRange[0]+1,0])
+                    editor.setCursorScreenPosition([rowRange[0],0])
                     editor.moveToFirstCharacterOfLine()
                 selection.selectLine rowRange[1]
+                editor.toggleSoftWrapped()
             selectionText = selection.getText()
 
             editor.transact(() ->
