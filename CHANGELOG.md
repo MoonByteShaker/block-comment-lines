@@ -1,3 +1,5 @@
+## 0.1.9
+* description - url for presentation_1.gif is updated
 ## 0.1.8
 * description - presentation_1.gif was uploaded
 * description - order in changelog is reversed
