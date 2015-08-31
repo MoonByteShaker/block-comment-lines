@@ -1,3 +1,6 @@
+## 0.1.8
+* description - presentation_1.gif was uploaded
+* description - order in changelog is reversed
 ## 0.1.7
 * bugfix - comment works with soft wrap
 * description - description is shorter
