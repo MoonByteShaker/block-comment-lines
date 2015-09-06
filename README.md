@@ -12,7 +12,7 @@ Supported languages are:
 - PHP
 - Markdown
 - ActionScript
-- TypeScript
+- TypeScript 
 
 ![presentation_1](https://raw.githubusercontent.com/kaasbaardje/block-comment-lines/master/gifs/presentation_1.gif)
 

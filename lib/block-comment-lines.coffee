@@ -189,7 +189,7 @@ module.exports =
                     commentEnd = 'COMMENT'
                 else
                     commentStart = '/*'
-                    commentEnd = '*/'
+                    commentEnd = '*/' 
 
             selection = editor.getLastSelection()
 
