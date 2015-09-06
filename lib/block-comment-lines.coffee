@@ -178,12 +178,15 @@ module.exports =
                 when 'js'
                     commentStart = '/*'
                     commentEnd = '*/'
-                when 'html'
+                when 'html', 'gfm'
                     commentStart = '<!--'
                     commentEnd = '-->'
                 when 'coffee'
                     commentStart = '###'
                     commentEnd = '###'
+                when 'sh', 'shell'
+                    commentStart = ": <<'COMMENT'"
+                    commentEnd = 'COMMENT'
                 else
                     commentStart = '/*'
                     commentEnd = '*/'
