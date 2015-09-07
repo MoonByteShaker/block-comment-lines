@@ -12,12 +12,12 @@ Supported languages are:
 - PHP
 - Markdown
 - ActionScript
-- TypeScript 
+- TypeScript
 
 ![presentation_1](https://raw.githubusercontent.com/kaasbaardje/block-comment-lines/master/gifs/presentation_1.gif)
 
 Todo:
-- second shortcurt for documentation block-comment -> /\*\*....\*/
-- adjustable text for start and end of block-comments like: "###" -> /\*### .... ###\*/
+- second shortcurt for documentation block-comment --> /\*\*....\*/
+- adjustable text for start and end of block-comments like: ### --> /\*### .... ###\*/
 - option for adjustable background-colors in block-comments
 - option for enumeration in block-comments

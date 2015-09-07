@@ -10,7 +10,7 @@
   {
     'label': 'Packages'
     'submenu': [
-      'label': 'block-comment-lines'
+      'label': 'Block Comment Lines'
       'submenu': [
         {
           'label': 'Toggle'

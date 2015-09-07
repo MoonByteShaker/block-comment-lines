@@ -1,12 +1,9 @@
 module.exports =
     activate: ->
         atom.commands.add 'atom-workspace', 'block-comment-lines:toggle': @toggle
-        # atom.workspaceView.command "block-comment-line:toggle", => @toggle()
 
     toggle: ->
-        workspace = atom.workspace
-        editor = workspace.getActiveTextEditor()
-
+        editor = atom.workspace.getActiveTextEditor()
         getDescriptorArray = () ->
             descriptorArray = editor.scopeDescriptorForBufferPosition(editor.getCursorBufferPosition()).getScopesArray()
 
@@ -189,7 +186,7 @@ module.exports =
                     commentEnd = 'COMMENT'
                 else
                     commentStart = '/*'
-                    commentEnd = '*/' 
+                    commentEnd = '*/'
 
             selection = editor.getLastSelection()
 
