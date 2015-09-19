@@ -162,6 +162,7 @@ module.exports =
                 return true
             return false
         setBracket: ->
+            editor = @editor
             language = @getLanguage()
             switch language
                 when 'js'
@@ -180,30 +181,22 @@ module.exports =
                     commentStart = '/*'
                     commentEnd = '*/'
 
-            selection = @editor.getLastSelection()
+            selection = editor.getLastSelection()
+            
+            isWrapped = editor.isSoftWrapped()
+            editor.setSoftWrapped(false) if isWrapped
 
-            if selection.isSingleScreenLine()
-                @editor.moveToFirstCharacterOfLine()
-                selection.selectToEndOfLine()
-                selectionText = selection.getText()
-                selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
-                return
-            else
-                @editor.toggleSoftWrapped()
-                rowRange = selection.getBufferRowRange()
-                if selection.isReversed()
-                    selection.selectToFirstCharacterOfLine()
-                else
-                    @editor.setCursorScreenPosition([rowRange[0],0])
-                    @editor.moveToFirstCharacterOfLine()
-                selection.selectLine rowRange[1]
-                @editor.toggleSoftWrapped()
+            rowRange = selection.getBufferRowRange()
+            selectionEnd = editor.getSoftWrapColumn()
+            editor.setCursorScreenPosition([rowRange[0],0])
+            editor.selectToFirstCharacterOfLine()
+            selectionStart = editor.getSelectedScreenRange().end.column
+            screenRange = [
+                [rowRange[0], selectionStart],
+                [rowRange[1], selectionEnd]]
+            editor.setSelectedScreenRange(screenRange)
+
+            editor.setSoftWrapped(true) if isWrapped
+
             selectionText = selection.getText()
-
-            @editor.transact(() ->
-                editor = module.exports.methods.editor
-                selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
-                editor.insertNewline()
-                editor.moveUp 2
-                selection.joinLines()
-            )
+            selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
