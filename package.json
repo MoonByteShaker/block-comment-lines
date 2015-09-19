@@ -1,7 +1,7 @@
 {
   "name": "block-comment-lines",
   "main": "./lib/block-comment-lines",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Puts selected lines in a block-comment or removes it by toggling.",
   "activationCommands": {
     "atom-text-editor": [
