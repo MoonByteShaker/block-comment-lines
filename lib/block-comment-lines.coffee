@@ -1,12 +1,114 @@
 module.exports =
     activate: ->
         atom.commands.add 'atom-workspace', 'block-comment-lines:toggle': @toggle
+        atom.commands.add 'atom-workspace', 'block-comment-lines:toggleWithConfigText': @toggleWithConfigText
+    config:
+      commentText:
+        type: 'string'
+        default: '###'
     toggle: ->
         methods = module.exports.methods
         methods.setEditor()
         return if methods.removeBracket()
         methods.setBracket()
+    toggleWithConfigText: ->
+        methods = module.exports.methods
+        methods.setEditor()
+        configText = atom.config.get('block-comment-lines.commentText')
+        configText = "/*" + configText + "*/"
+        return if methods.removeBracket(configText)
+        methods.setBracket(configText)
     methods:
+        setBracket: (configText) ->
+            editor = @editor
+            language = @getLanguage()
+            switch language
+                when 'js'
+                    commentStart = '/*'
+                    commentEnd = '*/'
+                when 'html', 'gfm'
+                    commentStart = '<!--'
+                    commentEnd = '-->'
+                when 'coffee'
+                    commentStart = '###'
+                    commentEnd = '###'
+                when 'sh', 'shell'
+                    commentStart = ": <<'COMMENT'"
+                    commentEnd = 'COMMENT'
+                else
+                    commentStart = '/*'
+                    commentEnd = '*/'
+
+            selection = editor.getLastSelection()
+
+            isWrapped = editor.isSoftWrapped()
+            editor.setSoftWrapped(false) if isWrapped
+
+            rowRange = selection.getBufferRowRange()
+            selectionEnd = editor.getSoftWrapColumn()
+            editor.setCursorScreenPosition([rowRange[0],0])
+            editor.selectToFirstCharacterOfLine()
+            selectionStart = editor.getSelectedScreenRange().end.column
+            screenRange = [
+                [rowRange[0], selectionStart],
+                [rowRange[1], selectionEnd]]
+            editor.setSelectedScreenRange(screenRange)
+            selectionText = selection.getText()
+
+            @editor.transact ->
+                if configText
+                    editor.insertText("#{configText}")
+                    editor.insertNewline()
+                selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
+                if configText
+                    editor.insertNewline()
+                    editor.setCursorScreenPosition([rowRange[1]+2,selectionStart])
+                    editor.insertText("#{configText}")
+
+            editor.setSoftWrapped(true) if isWrapped
+        removeBracket: (configText) ->
+            if @isCursorInBlockComment()
+                @editor.toggleSoftWrapped()
+                characterCountToTop = @getCharacterCount "top"
+                commentDefinitionStartRange = @getCommentDefinitionRange 'start'
+                while ! commentDefinitionStartRange? and characterCountToTop > 0
+                    characterCountToTop--
+                    @editor.moveLeft 1
+                    commentDefinitionStartRange = @getCommentDefinitionRange 'start'
+                if ! commentDefinitionStartRange? or characterCountToTop is 0
+                    @editor.toggleSoftWrapped()
+                    return true
+
+                characterCountToBottom = @getCharacterCount "bottom"
+                commentDefinitionEndRange = @getCommentDefinitionRange 'end'
+                while ! commentDefinitionEndRange? and characterCountToBottom > 0
+                    characterCountToBottom--
+                    @editor.moveRight 1
+                    commentDefinitionEndRange = @getCommentDefinitionRange 'end'
+                if ! commentDefinitionEndRange? or characterCountToBottom is 0
+                    @editor.toggleSoftWrapped()
+                    return true
+
+                # if configText
+                #     commentDefinitionStartRange = [
+                #         [commentDefinitionStartRange.start.row-1,
+                #         commentDefinitionStartRange.start.column],
+                #         commentDefinitionStartRange.end]
+                #     commentDefinitionEndRange = [
+                #         commentDefinitionEndRange.start,
+                #         [commentDefinitionEndRange.end.row+1,
+                #         commentDefinitionEndRange.end.column]]
+
+                selection = @editor.getLastSelection()
+                @editor.transact ->
+                    selection.setScreenRange commentDefinitionEndRange
+                    selection.insertText ""
+                    selection.setScreenRange commentDefinitionStartRange
+                    selection.insertText ""
+
+                @editor.toggleSoftWrapped()
+                return true
+            return false
         setEditor: ->
             @editor = atom.workspace.getActiveTextEditor()
         editor: null
@@ -125,78 +227,5 @@ module.exports =
                     lineCommentRange = lineCommentRange.end
                 else
                     return false
-
             @editor.setCursorScreenPosition lineCommentRange
             @getApiCommentDefinitionRange comDefType
-        removeBracket: ->
-            if @isCursorInBlockComment()
-                @editor.toggleSoftWrapped()
-                characterCountToTop = @getCharacterCount "top"
-                commentDefinitionStartRange = @getCommentDefinitionRange 'start'
-                while ! commentDefinitionStartRange? and characterCountToTop > 0
-                    characterCountToTop--
-                    @editor.moveLeft 1
-                    commentDefinitionStartRange = @getCommentDefinitionRange 'start'
-                if ! commentDefinitionStartRange? or characterCountToTop is 0
-                    @editor.toggleSoftWrapped()
-                    return true
-
-                characterCountToBottom = @getCharacterCount "bottom"
-                commentDefinitionEndRange = @getCommentDefinitionRange 'end'
-                while ! commentDefinitionEndRange? and characterCountToBottom > 0
-                    characterCountToBottom--
-                    @editor.moveRight 1
-                    commentDefinitionEndRange = @getCommentDefinitionRange 'end'
-                if ! commentDefinitionEndRange? or characterCountToBottom is 0
-                    @editor.toggleSoftWrapped()
-                    return true
-
-                selection = @editor.getLastSelection()
-                @editor.transact(() ->
-                    selection.setScreenRange commentDefinitionEndRange
-                    selection.insertText ""
-                    selection.setScreenRange commentDefinitionStartRange
-                    selection.insertText ""
-                )
-                @editor.toggleSoftWrapped()
-                return true
-            return false
-        setBracket: ->
-            editor = @editor
-            language = @getLanguage()
-            switch language
-                when 'js'
-                    commentStart = '/*'
-                    commentEnd = '*/'
-                when 'html', 'gfm'
-                    commentStart = '<!--'
-                    commentEnd = '-->'
-                when 'coffee'
-                    commentStart = '###'
-                    commentEnd = '###'
-                when 'sh', 'shell'
-                    commentStart = ": <<'COMMENT'"
-                    commentEnd = 'COMMENT'
-                else
-                    commentStart = '/*'
-                    commentEnd = '*/'
-
-            selection = editor.getLastSelection()
-            
-            isWrapped = editor.isSoftWrapped()
-            editor.setSoftWrapped(false) if isWrapped
-
-            rowRange = selection.getBufferRowRange()
-            selectionEnd = editor.getSoftWrapColumn()
-            editor.setCursorScreenPosition([rowRange[0],0])
-            editor.selectToFirstCharacterOfLine()
-            selectionStart = editor.getSelectedScreenRange().end.column
-            screenRange = [
-                [rowRange[0], selectionStart],
-                [rowRange[1], selectionEnd]]
-            editor.setSelectedScreenRange(screenRange)
-
-            editor.setSoftWrapped(true) if isWrapped
-
-            selectionText = selection.getText()
-            selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})

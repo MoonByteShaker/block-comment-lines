@@ -16,6 +16,10 @@
           'label': 'Toggle'
           'command': 'block-comment-lines:toggle'
         }
+        {
+          'label': 'Toggle With Config Text'
+          'command': 'block-comment-lines:toggleWithConfigText'
+        }
       ]
     ]
   }
