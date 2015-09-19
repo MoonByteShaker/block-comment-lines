@@ -1,3 +1,5 @@
+## 0.2.0
+* bugfix - multirow selection didn't worked because of a behavior change of some atom api methods
 ## 0.1.9
 * description - url for presentation_1.gif is updated
 ## 0.1.8
