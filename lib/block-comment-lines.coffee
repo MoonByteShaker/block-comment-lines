@@ -67,46 +67,48 @@ module.exports =
 
             editor.setSoftWrapped(true) if isWrapped
         removeBracket: (configText) ->
+            editor = @editor
             if @isCursorInBlockComment()
-                @editor.toggleSoftWrapped()
+                editor.toggleSoftWrapped()
                 characterCountToTop = @getCharacterCount "top"
                 commentDefinitionStartRange = @getCommentDefinitionRange 'start'
                 while ! commentDefinitionStartRange? and characterCountToTop > 0
                     characterCountToTop--
-                    @editor.moveLeft 1
+                    editor.moveLeft 1
                     commentDefinitionStartRange = @getCommentDefinitionRange 'start'
                 if ! commentDefinitionStartRange? or characterCountToTop is 0
-                    @editor.toggleSoftWrapped()
+                    editor.toggleSoftWrapped()
                     return true
 
                 characterCountToBottom = @getCharacterCount "bottom"
                 commentDefinitionEndRange = @getCommentDefinitionRange 'end'
                 while ! commentDefinitionEndRange? and characterCountToBottom > 0
                     characterCountToBottom--
-                    @editor.moveRight 1
+                    editor.moveRight 1
                     commentDefinitionEndRange = @getCommentDefinitionRange 'end'
                 if ! commentDefinitionEndRange? or characterCountToBottom is 0
-                    @editor.toggleSoftWrapped()
+                    editor.toggleSoftWrapped()
                     return true
 
-                # if configText
-                #     commentDefinitionStartRange = [
-                #         [commentDefinitionStartRange.start.row-1,
-                #         commentDefinitionStartRange.start.column],
-                #         commentDefinitionStartRange.end]
-                #     commentDefinitionEndRange = [
-                #         commentDefinitionEndRange.start,
-                #         [commentDefinitionEndRange.end.row+1,
-                #         commentDefinitionEndRange.end.column]]
+                if configText
+                    commentDefinitionStartRange = [
+                        [commentDefinitionStartRange.start.row-1,
+                        commentDefinitionStartRange.start.column],
+                        commentDefinitionStartRange.end]
+                    endRow = commentDefinitionEndRange.end.row+1
+                    editor.setCursorScreenPosition([endRow,0])
+                    endColumn = editor.getSoftWrapColumn()
+                    commentDefinitionEndRange = [
+                        commentDefinitionEndRange.start,
+                        [endRow, endColumn]]
 
-                selection = @editor.getLastSelection()
-                @editor.transact ->
-                    selection.setScreenRange commentDefinitionEndRange
-                    selection.insertText ""
-                    selection.setScreenRange commentDefinitionStartRange
-                    selection.insertText ""
+                editor.transact ->
+                    editor.setSelectedScreenRange commentDefinitionEndRange
+                    editor.insertText ""
+                    editor.setSelectedScreenRange commentDefinitionStartRange
+                    editor.insertText ""
 
-                @editor.toggleSoftWrapped()
+                editor.toggleSoftWrapped()
                 return true
             return false
         setEditor: ->

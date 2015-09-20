@@ -5,7 +5,8 @@
   "description": "Puts selected lines in a block-comment or removes it by toggling.",
   "activationCommands": {
     "atom-text-editor": [
-      "block-comment-lines:toggle"
+      "block-comment-lines:toggle",
+      "block-comment-lines:toggleWithConfigText"
     ]
   },
   "repository": "https://github.com/kaasbaardje/block-comment-lines",
