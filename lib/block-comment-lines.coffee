@@ -89,6 +89,7 @@ module.exports =
                     commentDefinitionEndRange = [
                         commentDefinitionEndRange.start,
                         [endRow, endColumn]]
+                        
                     ###startText = editor.lineTextForScreenRow(startRow).trim()
                     endText = editor.lineTextForScreenRow(endRow).trim()
                     commentDef = @getCommentDef()
