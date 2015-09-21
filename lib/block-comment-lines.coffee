@@ -15,31 +15,15 @@ module.exports =
         methods = module.exports.methods
         methods.setEditor()
         configText = atom.config.get('block-comment-lines.commentText')
-        configText = "/*" + configText + "*/"
         return if methods.removeBracket(configText)
         methods.setBracket(configText)
     methods:
         setBracket: (configText) ->
             editor = @editor
-            language = @getLanguage()
-            switch language
-                when 'js'
-                    commentStart = '/*'
-                    commentEnd = '*/'
-                when 'html', 'gfm'
-                    commentStart = '<!--'
-                    commentEnd = '-->'
-                when 'coffee'
-                    commentStart = '###'
-                    commentEnd = '###'
-                when 'sh', 'shell'
-                    commentStart = ": <<'COMMENT'"
-                    commentEnd = 'COMMENT'
-                else
-                    commentStart = '/*'
-                    commentEnd = '*/'
-
             selection = editor.getLastSelection()
+            commentDef = @getCommentDef()
+            commentStart = commentDef.commentStart
+            commentEnd = commentDef.commentEnd
 
             isWrapped = editor.isSoftWrapped()
             editor.setSoftWrapped(false) if isWrapped
@@ -57,6 +41,7 @@ module.exports =
 
             @editor.transact ->
                 if configText
+                    configText = commentStart + configText + commentEnd
                     editor.insertText("#{configText}")
                     editor.insertNewline()
                 selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
@@ -91,8 +76,11 @@ module.exports =
                     return true
 
                 if configText
+                    oldCommentDefinitionStartRange = commentDefinitionStartRange
+                    oldCommentDefinitionEndRange = commentDefinitionEndRange
+                    startRow = commentDefinitionStartRange.start.row-1
                     commentDefinitionStartRange = [
-                        [commentDefinitionStartRange.start.row-1,
+                        [startRow,
                         commentDefinitionStartRange.start.column],
                         commentDefinitionStartRange.end]
                     endRow = commentDefinitionEndRange.end.row+1
@@ -101,6 +89,16 @@ module.exports =
                     commentDefinitionEndRange = [
                         commentDefinitionEndRange.start,
                         [endRow, endColumn]]
+                    ###startText = editor.lineTextForScreenRow(startRow).trim()
+                    endText = editor.lineTextForScreenRow(endRow).trim()
+                    commentDef = @getCommentDef()
+                    commentStart = commentDef.commentStart
+                    commentEnd = commentDef.commentEnd
+                    configText = commentStart + configText + commentEnd
+
+                    if configText isnt startText and configText isnt endText
+                        commentDefinitionStartRange = oldCommentDefinitionStartRange
+                        commentDefinitionEndRange = oldCommentDefinitionEndRange###
 
                 editor.transact ->
                     editor.setSelectedScreenRange commentDefinitionEndRange
@@ -146,6 +144,27 @@ module.exports =
             else
                 descriptorArray = descriptorArray[0].split "."
             return descriptorArray[1]
+        getCommentDef: ->
+            language = @getLanguage()
+            switch language
+                when 'js'
+                    commentStart = '/*'
+                    commentEnd = '*/'
+                when 'html', 'gfm'
+                    commentStart = '<!--'
+                    commentEnd = '-->'
+                when 'coffee'
+                    commentStart = '###'
+                    commentEnd = '###'
+                when 'sh', 'shell'
+                    commentStart = ": <<'COMMENT'"
+                    commentEnd = 'COMMENT'
+                else
+                    commentStart = '/*'
+                    commentEnd = '*/'
+            return {
+                commentStart: commentStart
+                commentEnd: commentEnd }
         isBlockCommentDefinition_Workaround: ->
             descriptorArray = @getDescriptorArray()
             for element in descriptorArray
