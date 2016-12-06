@@ -14,6 +14,16 @@ Supported languages are:
 - ActionScript
 - TypeScript
 
+# Default keybinding:
+
+The default keybinding to toggle the block-comment-lines is `alt-shift-B`.
+
+You can override it by copy-pasting the following code section and replacing the `alt-shift-b` with your prefered keybinding.
+```
+'atom-text-editor':
+  'alt-shift-B': 'block-comment-lines:toggle'
+```
+
 ![presentation_1](https://raw.githubusercontent.com/kaasbaardje/block-comment-lines/master/gifs/presentation_1.gif)
 
 Todo:
