@@ -37,14 +37,14 @@ module.exports =
                 [rowRange[0], selectionStart],
                 [rowRange[1], selectionEnd]]
             editor.setSelectedScreenRange(screenRange)
-            selectionText = selection.getText()
+            selectionText = selection.getText().replace(/^/gm, '* ')
 
             @editor.transact ->
                 if configText
                     configText = commentStart + configText + commentEnd
                     editor.insertText("#{configText}")
                     editor.insertNewline()
-                selection.insertText(commentStart + selectionText + commentEnd, {select: false, autoIndentNewline: false})
+                selection.insertText(commentStart + '\n' + selectionText + '\n' + commentEnd, {select: false, autoIndentNewline: false})
                 if configText
                     editor.insertNewline()
                     editor.setCursorScreenPosition([rowRange[1]+2,selectionStart])
